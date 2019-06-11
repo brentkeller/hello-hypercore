@@ -6,11 +6,16 @@ import * as serviceWorker from './serviceWorker';
 
 import hypercore from 'hypercore';
 import ram from 'random-access-memory';
+import rai from 'random-access-idb';
 
-const feed = new hypercore(ram);
+const todos = rai('todos');
+
+const storage = (filename: any) => todos(filename);
+
+const feed = new hypercore(storage);
 
 
-feed.append('hello world');
+// feed.append('hello world');
 
 feed.on('ready', () => {
   console.log('ready');
@@ -21,7 +26,7 @@ feed.on('ready', () => {
     console.log('onData', d.toString());
   });
 
-  feed.append('hello again');
+  // feed.append('hello again');
 
 });
 
