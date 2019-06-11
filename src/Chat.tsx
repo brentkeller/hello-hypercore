@@ -1,40 +1,65 @@
 import React, { useRef, useState, useEffect, FormEventHandler } from 'react';
 
 import hypercore from 'hypercore';
+import crypto from 'hypercore-crypto';
 //import ram from 'random-access-memory';
 import rai from 'random-access-idb';
-import { Buffer } from 'buffer';
 
+import swarm from 'webrtc-swarm';
+import signalhub from 'signalhub';
+
+import { Buffer } from 'buffer';
 const key = Buffer.from(
-  '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
+  'fcc6212465b39a9a704d564f08da0402af210888e730f419a7faf5f347a33b3d'
 );
 const secretKey = Buffer.from(
   '1234567890abcdef1234567890abcdef1234567890abcdef1234567890fedcba'
 );
 
+// const discoveryKey =
+//   'c65c11064005ef183421c45014e9831392069731239b2767ff6381152ac00379';
+
+const discoveryKey = crypto.discoveryKey(key);
+
+
 const todos = rai('todos');
+
+console.log('crypto discoveryKey', discoveryKey.toString('hex'));
 
 const storage = (filename: any) => todos(filename);
 
-const feed = new hypercore(storage, { valueEncoding: 'utf-8' });
-// const feed = new hypercore(storage, key, { secretKey });
+//const feed = new hypercore(storage, { valueEncoding: 'utf-8' });
+const feed = new hypercore(storage, discoveryKey, { secretKey, valueEncoding: 'utf-8' });
 
 // feed.append('hello world');
-const feedItems: string[] = [];
 
-// feed.on('ready', () => {
-//   console.log('ready', feed.key.toString('hex'));
+feed.on('ready', () => {
+  console.log('ready', feed.key.toString('hex'));
+  console.log('discovery', feed.discoveryKey.toString('hex'));
 
-//   // feed.get(0, (err: any, d: any) => console.log(d.toString()));
-//   // feed.get(1, (err: any, d: any) => console.log(d.toString()));
+  // const hub = signalhub(Buffer.from(discoveryKey), [
+  //   'https://signalhub-jccqtwhdwc.now.sh/',
+  // ]);
 
-//   // feed.append('hello again');
-// });
+  const hub = signalhub(discoveryKey.toString('hex'), [
+    'https://signalhub-jccqtwhdwc.now.sh/',
+  ]);
+
+  const sw = swarm(hub);
+
+  sw.on('peer', (peer: any, id: any) => {
+    peer.pipe(feed.replicate({ encrypt: false, live: true })).pipe(peer);
+    console.log('peer', id);
+  });
+
+  //   // feed.get(0, (err: any, d: any) => console.log(d.toString()));
+});
 
 const stream = feed.createReadStream({ live: true });
 
 const addToFeed = (t: string) => {
   feed.append(t);
+  
 };
 
 export const Chat = () => {
