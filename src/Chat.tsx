@@ -1,13 +1,12 @@
-import React, { useRef, useState, useEffect, FormEventHandler, PureComponent } from 'react';
+import React, { useRef, useState, useEffect, FormEventHandler } from 'react';
 
-import hypercore from 'hypercore';
+import hyperdb from 'hyperdb';
 import crypto from 'hypercore-crypto';
 //import ram from 'random-access-memory';
 import rai from 'random-access-idb';
 
 import swarm from 'webrtc-swarm';
 import signalhub from 'signalhub';
-import pump from 'pump';
 
 import { Buffer } from 'buffer';
 const key = Buffer.from(
@@ -22,23 +21,20 @@ const secretKey = Buffer.from(
 
 const discoveryKey = crypto.discoveryKey(key);
 
-
 const todos = rai('todos');
 
 console.log('crypto discoveryKey', discoveryKey.toString('hex'));
 
 const storage = (filename: any) => todos(filename);
 
-//const feed = new hypercore(storage, { valueEncoding: 'utf-8' });
-const feed = hypercore(storage, discoveryKey, { secretKey, valueEncoding: 'utf-8' });
+//const db = new hypercore(storage, { valueEncoding: 'utf-8' });
+const db = hyperdb(storage, discoveryKey, { valueEncoding: 'utf-8' });
 
-// feed.append('hello world');
+db.on('error', (err: any) => console.log(err));
 
-feed.on('error', (err: any) => console.log(err));
-
-feed.on('ready', () => {
-  console.log('ready', feed.key.toString('hex'));
-  console.log('discovery', feed.discoveryKey.toString('hex'));
+db.on('ready', () => {
+  console.log('ready', db.key.toString('hex'));
+  console.log('discovery', db.discoveryKey.toString('hex'));
 
   // const hub = signalhub(Buffer.from(discoveryKey), [
   //   'https://signalhub-jccqtwhdwc.now.sh/',
@@ -51,38 +47,46 @@ feed.on('ready', () => {
   const sw = swarm(hub);
   sw.on('peer', (peer: any, id: any) => {
     console.log('peer', id, peer);
-    const replicationStream = feed.replicate({ encrypt: false, live: true });
+    const replicationStream = db.replicate({ encrypt: false, live: true });
     peer.pipe(replicationStream).pipe(peer);
   });
 
-  //   // feed.get(0, (err: any, d: any) => console.log(d.toString()));
+  //   // db.get(0, (err: any, d: any) => console.log(d.toString()));
 });
 
-const stream = feed.createReadStream({ live: true });
+const stream = db.createReadStream({ live: true });
 
-const addToFeed = (t: string) => {
-  feed.append(t);
-  
+const addTodb = (t: string) => {
+  const newKey = crypto.randomBytes(12).toString();
+  db.put(newKey, t, (err: any) => {
+    if (err) throw err;
+    db.get(newKey, function(err: any, nodes: any) {
+      if (err) throw err;
+      console.log(`${newKey} --> `, nodes[0].value);
+    });
+  });
 };
 
 export const Chat = () => {
   const [items, setItems] = useState<string[]>([]);
 
-  const readItem = (value: string) => {
-    console.log('onData', value, items);
-    setItems(prevState => [...prevState, value]);
+  const readItem = (value: any) => {
+    const text = value[0].value;
+    console.log('onData', text, value );
+    setItems(prevState => [...prevState, text]);
   };
 
   useEffect(() => {
     stream.on('data', readItem);
   }, []);
+  
   const input = useRef<HTMLInputElement>() as React.RefObject<HTMLInputElement>;
   const save: FormEventHandler<HTMLFormElement> = e => {
     e.preventDefault();
     if (input && input.current) {
       const newText = input.current.value.trim();
       if (newText.length === 0) return;
-      addToFeed(newText);
+      addTodb(newText);
       input.current.value = '';
     }
   };

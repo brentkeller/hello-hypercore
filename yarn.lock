@@ -1727,7 +1727,7 @@ array-includes@^3.0.3:
     define-properties "^1.1.2"
     es-abstract "^1.7.0"
 
-array-lru@^1.1.0:
+array-lru@^1.1.0, array-lru@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/array-lru/-/array-lru-1.1.1.tgz#0c7e1b4e022ae166ff1e8448c595f3181fcd3337"
   integrity sha1-DH4bTgIq4Wb/HoRIxZXzGB/NMzc=
@@ -2281,7 +2281,7 @@ buffer-alloc-unsafe@^1.0.0, buffer-alloc-unsafe@^1.1.0:
   resolved "https://registry.yarnpkg.com/buffer-alloc-unsafe/-/buffer-alloc-unsafe-1.1.0.tgz#bd7dc26ae2972d0eda253be061dba992349c19f0"
   integrity sha512-TEM2iMIEQdJ2yjPJoSIsldnleVaAk1oW3DBVUykyOLsEsFmEc9kn+SFFPz+gl54KQNxlDnAwCXosOS9Okx2xAg==
 
-buffer-alloc@^1.1.0:
+buffer-alloc@^1.1.0, buffer-alloc@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/buffer-alloc/-/buffer-alloc-1.2.0.tgz#890dd90d923a873e08e10e5fd51a57e5b7cce0ec"
   integrity sha512-CFsHQgjtW1UChdXgbyJGtnm+O/uLQeZdtbDo8mfUgYXCHSM1wgrVxXm6bSyrUuErEb+4sYVGCzASBRot7zyrow==
@@ -2616,6 +2616,11 @@ code-point-at@^1.0.0:
   resolved "https://registry.yarnpkg.com/code-point-at/-/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
   integrity sha1-DQcLTQQ6W+ozovGkDi7bPZpMz3c=
 
+codecs@^1.2.0, codecs@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/codecs/-/codecs-1.2.1.tgz#10155c751578919883bd87e425db04af86a0188c"
+  integrity sha512-SPnx+ZHXVJ0qTInRXmnxuyu8PDvSzvop5MXp1BOr/urFQI3yL2n5ewE755skTklF/hKVlWj8cinGxdR2gvLvTA==
+
 codecs@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/codecs/-/codecs-2.0.0.tgz#680d1d4ac8ac3c8adbaa625c7ce06c6ee5792b50"
@@ -2698,6 +2703,11 @@ commondir@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/commondir/-/commondir-1.0.1.tgz#ddd800da0c66127393cca5950ea968a3aaf1253b"
   integrity sha1-3dgA2gxmEnOTzKWVDqloo6rxJTs=
+
+compare@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/compare/-/compare-2.0.0.tgz#8090b34dcb288f629e905972da69ea7a6d5922a0"
+  integrity sha512-FXeLLVm09Uh7Updmmx2NCCRG2nMq+mdY3DR9PqhVeOrie3IFU+occFQoqziFkHlTUDw8mDgmdblIZ+J9tsSAUA==
 
 component-emitter@^1.2.1:
   version "1.3.0"
@@ -4806,7 +4816,7 @@ hypercore-crypto@^1.0.0:
     sodium-universal "^2.0.0"
     uint64be "^2.0.2"
 
-hypercore-protocol@^6.4.1:
+hypercore-protocol@^6.4.1, hypercore-protocol@^6.6.4:
   version "6.11.0"
   resolved "https://registry.yarnpkg.com/hypercore-protocol/-/hypercore-protocol-6.11.0.tgz#feffde791aea9986e62859229d7cab331d4884c7"
   integrity sha512-V/0Vru8gavoO++K2QFOAXu7xgBuXcBAjURQ9BQ48DnQ/p4hK4Jy76ulRnppDHpbDthxRziMWLZfmYXncwD63Aw==
@@ -4819,6 +4829,41 @@ hypercore-protocol@^6.4.1:
     sodium-universal "^2.0.0"
     sorted-indexof "^1.0.0"
     varint "^5.0.0"
+
+hypercore@^6.13.0:
+  version "6.26.0"
+  resolved "https://registry.yarnpkg.com/hypercore/-/hypercore-6.26.0.tgz#a3b53f7980229da8e5badfd117ead8feebcaae5a"
+  integrity sha512-su/bucp958SyFWWF5uzeLT05N0k7gTbktvLCo0TaloXWSSs2OiFyj3Ka7v93yaD9u0vBT3i0foPoZnj1yC/dog==
+  dependencies:
+    array-lru "^1.1.0"
+    atomic-batcher "^1.0.2"
+    bitfield-rle "^2.2.1"
+    buffer-alloc "^1.2.0"
+    buffer-alloc-unsafe "^1.0.0"
+    buffer-from "^1.0.0"
+    bulk-write-stream "^1.1.3"
+    codecs "^1.2.0"
+    fast-bitfield "^1.2.2"
+    flat-tree "^1.6.0"
+    from2 "^2.3.0"
+    hypercore-crypto "^1.0.0"
+    hypercore-protocol "^6.4.1"
+    inherits "^2.0.3"
+    inspect-custom-symbol "^1.1.0"
+    last-one-wins "^1.0.4"
+    memory-pager "^1.0.2"
+    merkle-tree-stream "^3.0.3"
+    pretty-hash "^1.0.1"
+    process-nextick-args "^1.0.7"
+    random-access-file "^2.1.0"
+    sodium-universal "^2.0.0"
+    sparse-bitfield "^3.0.0"
+    thunky "^1.0.1"
+    uint64be "^2.0.1"
+    unordered-array-remove "^1.0.2"
+    unordered-set "^2.0.0"
+  optionalDependencies:
+    fd-lock "^1.0.2"
 
 hypercore@^7.2.0:
   version "7.2.0"
@@ -4850,6 +4895,28 @@ hypercore@^7.2.0:
     unordered-set "^2.0.0"
   optionalDependencies:
     fd-lock "^1.0.2"
+
+hyperdb@^3.5.0:
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/hyperdb/-/hyperdb-3.5.0.tgz#0bfd6c97de44f20918c692db537ebee200b890db"
+  integrity sha512-NfubW5251YCMcU2iTgobcAHS53qRzwAS+jDOANu0B9W72xtlOFKOlICkvqsMmMiF0SUAVy/Yfud8DUuykeoIJQ==
+  dependencies:
+    array-lru "^1.1.1"
+    bulk-write-stream "^1.1.3"
+    codecs "^1.2.1"
+    compare "^2.0.0"
+    hypercore "^6.13.0"
+    hypercore-protocol "^6.6.4"
+    inherits "^2.0.3"
+    mutexify "^1.2.0"
+    nanoiterator "^1.1.0"
+    protocol-buffers-encodings "^1.1.0"
+    random-access-file "^2.0.1"
+    sodium-universal "^2.0.0"
+    thunky "^1.0.2"
+    unordered-array-remove "^1.0.2"
+    unordered-set "^2.0.0"
+    varint "^5.0.0"
 
 iconv-lite@0.4.23:
   version "0.4.23"
@@ -6540,6 +6607,11 @@ mute-stream@0.0.7:
   resolved "https://registry.yarnpkg.com/mute-stream/-/mute-stream-0.0.7.tgz#3075ce93bc21b8fab43e1bc4da7e8115ed1e7bab"
   integrity sha1-MHXOk7whuPq0PhvE2n6BFe0ee6s=
 
+mutexify@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/mutexify/-/mutexify-1.2.0.tgz#45597975a2b035f56dcf61ff15cc8d73c28e7639"
+  integrity sha512-oprzxd2zhfrJqEuB98qc1dRMMonClBQ57UPDjnbcrah4orEMTq1jq3+AcdFe5ePzdbJXI7zmdhfftIdMnhYFoQ==
+
 nan@^2.12.1:
   version "2.13.2"
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.13.2.tgz#f51dc7ae66ba7d5d55e1e6d4d8092e802c9aefe7"
@@ -6554,6 +6626,14 @@ nanoassert@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/nanoassert/-/nanoassert-1.1.0.tgz#4f3152e09540fde28c76f44b19bbcd1d5a42478d"
   integrity sha1-TzFS4JVA/eKMdvRLGbvNHVpCR40=
+
+nanoiterator@^1.1.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/nanoiterator/-/nanoiterator-1.2.0.tgz#36461e246f9c52e591d8a097cea5886faec9f6af"
+  integrity sha512-Ybp8yZQDvjgqjrER+jlvZ2m/qzhK7gakNTKFDs84OLPrzsHcSbsFczJlNkDmyBlYldxFEO3JT3gwBWCN9nj8aQ==
+  dependencies:
+    inherits "^2.0.3"
+    readable-stream "^2.3.3"
 
 nanomatch@^1.2.9:
   version "1.2.13"
@@ -8006,6 +8086,11 @@ private@^0.1.6:
   resolved "https://registry.yarnpkg.com/private/-/private-0.1.8.tgz#2381edb3689f7a53d653190060fcf822d2f368ff"
   integrity sha512-VvivMrbvd2nKkiG38qjULzlc+4Vx4wm/whI9pQD35YrARNnhxeiRktSOhSukRLFNlzg6Br/cJPet5J/u19r/mg==
 
+process-nextick-args@^1.0.7:
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-1.0.7.tgz#150e20b756590ad3f91093f25a4f2ad8bff30ba3"
+  integrity sha1-FQ4gt1ZZCtP5EJPyWk8q2L/zC6M=
+
 process-nextick-args@~2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.0.tgz#a37d732f4271b4ab1ad070d35508e8290788ffaa"
@@ -8180,7 +8265,7 @@ raf@3.4.1:
   dependencies:
     performance-now "^2.1.0"
 
-random-access-file@^2.1.0:
+random-access-file@^2.0.1, random-access-file@^2.1.0:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/random-access-file/-/random-access-file-2.1.2.tgz#eeb32e50b9831f32060516862381152ae4e05aa6"
   integrity sha512-dZo7HEcEPbZ/6XLXC4GXypiWvFbXVkdeMrJTi0B94pBJwddt/AvJh8GaQhso6KGYROGYCI/VWdHbmRDtkwT9pQ==
