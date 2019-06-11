@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, FormEventHandler } from 'react';
+import React, { useRef, useState, useEffect, FormEventHandler, PureComponent } from 'react';
 
 import hypercore from 'hypercore';
 import crypto from 'hypercore-crypto';
@@ -7,6 +7,7 @@ import rai from 'random-access-idb';
 
 import swarm from 'webrtc-swarm';
 import signalhub from 'signalhub';
+import pump from 'pump';
 
 import { Buffer } from 'buffer';
 const key = Buffer.from(
@@ -29,9 +30,11 @@ console.log('crypto discoveryKey', discoveryKey.toString('hex'));
 const storage = (filename: any) => todos(filename);
 
 //const feed = new hypercore(storage, { valueEncoding: 'utf-8' });
-const feed = new hypercore(storage, discoveryKey, { secretKey, valueEncoding: 'utf-8' });
+const feed = hypercore(storage, discoveryKey, { secretKey, valueEncoding: 'utf-8' });
 
 // feed.append('hello world');
+
+feed.on('error', (err: any) => console.log(err));
 
 feed.on('ready', () => {
   console.log('ready', feed.key.toString('hex'));
@@ -46,10 +49,10 @@ feed.on('ready', () => {
   ]);
 
   const sw = swarm(hub);
-
   sw.on('peer', (peer: any, id: any) => {
-    peer.pipe(feed.replicate({ encrypt: false, live: true })).pipe(peer);
-    console.log('peer', id);
+    console.log('peer', id, peer);
+    const replicationStream = feed.replicate({ encrypt: false, live: true });
+    peer.pipe(replicationStream).pipe(peer);
   });
 
   //   // feed.get(0, (err: any, d: any) => console.log(d.toString()));
