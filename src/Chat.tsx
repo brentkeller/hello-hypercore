@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect, FormEventHandler } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 import hypercore from 'hypercore';
 import crypto from 'hypercore-crypto';
@@ -70,7 +71,9 @@ const addToFeed = (t: string) => {
 
 export const Chat = () => {
   const [items, setItems] = useState<string[]>([]);
-
+  const dispatch = useDispatch();
+  const messages = useSelector(state => state);
+  console.log('messages', messages);
   const readItem = (value: string) => {
     console.log('onData', value, items);
     setItems(prevState => [...prevState, value]);
@@ -85,6 +88,7 @@ export const Chat = () => {
     if (input && input.current) {
       const newText = input.current.value.trim();
       if (newText.length === 0) return;
+      dispatch({ type: 'CHAT_ADD_MESSAGE', payload: { message: newText } });
       addToFeed(newText);
       input.current.value = '';
     }
