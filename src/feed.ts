@@ -5,6 +5,7 @@ import swarm from 'webrtc-swarm';
 import signalhub from 'signalhub';
 import pump from 'pump';
 import { Buffer } from 'buffer';
+import { addMiddleware } from 'redux-dynamic-middlewares';
 
 // TODO: Add types for everything here
 
@@ -22,13 +23,14 @@ const mockCrypto = {
   },
 };
 
+// This is currently a class but might make more sense as just a function
 class Feed {
   private reduxStore: any;
+  private feed: any;
   private databaseName: string;
   private key: any;
   private secretKey: any;
   private peerHubs: Array<string>;
-  private feed: any;
 
   constructor(reduxStore: any, options: any) {
     if (!options.key)
@@ -43,15 +45,17 @@ class Feed {
     this.secretKey = Buffer.from(options.secretKey);
     this.databaseName = options.databaseName || 'data';
     this.peerHubs = options.peerHubs || [
-      'https://signalhub-jccqtwhdwc.now.sh/',
+      'https://signalhub-jccqtwhdwc.now.sh/', // default public signaling server
     ];
     this.reduxStore = reduxStore;
 
+    // Init an indexedDB
+    // I'm constructing a name here using the key because re-using the same name
+    // with different keys throws an error "Another hypercore is stored here"
     const todos = rai(`${this.databaseName}-${this.getKeyHex().substr(0, 12)}`);
     const storage = (filename: any) => todos(filename);
 
-    console.log('crypto discoveryKey');
-
+    // Create a new hypercore feed
     this.feed = hypercore(storage, this.key, {
       secretKey: this.secretKey,
       valueEncoding: 'utf-8',
@@ -59,61 +63,59 @@ class Feed {
     });
     this.feed.on('error', (err: any) => console.log(err));
 
-    this.feed.on('ready', this.onFeedReady);
+    this.feed.on('ready', () => {
+      console.log('ready', this.feed.key.toString('hex'));
+      console.log('discovery', this.feed.discoveryKey.toString('hex'));
+      this.joinSwarm();
+    });
     this.startStreamReader();
-
-    // Write to the feed
-    const addToFeed = (t: string) => {
-      this.reduxStore.dispatch({
-
-      })
-      this.feed.append(t);
-    };
+    // Inject our custom middleware using redux-dynamic-middlewares
+    // I did this because we need a middleware that can use our feed instance
+    // An alternative might be to instantiate Feed and then create the redux store,
+    // then you'd just need a Feed.assignStore(store) method or something to give this
+    // class a way to dispatch to the store.
+    addMiddleware(this.feedMiddleware);
   }
 
-  // How to apply this to the redux store?
-  feedMiddleware = (next: any) => (action: any) => {
+  // This middleware has an extra function at the beginning that takes
+  // a 'store' param, which we're not using so it's omitted.
+  // This is an implementation detail with redux-dynamic-middlewares
+  feedMiddleware = () => (next: any) => (action: any) => {
     if (action.type === FEED_ADD_ACTION) {
-      this.feed.append(action.action);
-      console.log('added to feed', action.type);
+      // Watch for any actions that should be added to the feed
+      console.log('adding to feed', action.payload.action.type);
+      this.feed.append(JSON.stringify(action.payload.action));
     }
-    next(action);
+    return next(action);
   };
 
-  onFeedReady = () => {
-    console.log('ready', this.feed.key.toString('hex'));
-    console.log('discovery', this.feed.discoveryKey.toString('hex'));
+    // Read items from this and peer feeds,
+  // then dispatch them to our redux store
+  startStreamReader = () => {
+    // Wire up reading from the feed
+    const stream = this.feed.createReadStream({ live: true });
+    stream.on('data', (value: string) => {
+      try {
+        const action = JSON.parse(value);
+        console.log('onData', action);
+        // duck typing so we only dispatch objects that are actions
+        if (action.type) this.reduxStore.dispatch(action);
+      } catch(err) {
+        console.log('feed read error', err);
+        console.log('feed stream returned an unknown value', value);
+      }
+    });
+  };
+
+  // Join our feed to the swarm and accept peers
+  joinSwarm = () => {
     // could add option to disallow peer connectivity here
     const hub = signalhub(this.getKeyHex(), this.peerHubs);
     const sw = swarm(hub);
     sw.on('peer', this.onPeerConnect);
-  }
-
-  startStreamReader = () => {
-    // Wire up reading from the feed
-    const stream = this.feed.createReadStream({ live: true });
-    stream.on('data', (value: any) => {
-      console.log('onData', value);
-      // todo: read the feed item, convert to an appropriate action and dispatch action to redux store here?
-      this.reduxStore.dispatch(value.payload.action);
-    });
   };
-  
-  // redux-swarmlog code:
-  // startReadStream() {
-  //   this.log.createReadStream({ live: true })
-  //   .on('data', function (data) {
-  //     const action = data.value
-  //     if (action.swarmLogSessionId !== sessionId) {
-  //       _reduxStore.dispatch({
-  //         ...action,
-  //         fromSwarm: true
-  //       })
-  //     }
-  //     logJson('RTC RECEIVED', data.value)
-  //   })
-  // }
 
+  // When a feed peer connects, replicate our feed to them
   onPeerConnect = (peer: any, id: any) => {
     console.log('peer', id, peer);
     pump(
@@ -133,6 +135,13 @@ class Feed {
 
 const FEED_ADD_ACTION = 'FEED_ADD_ACTION';
 
+// Method to wrap an action in a feed item action
+// Possible alternatives to this approach:
+// 1: Assume all actions are meant for the feed,
+//    remove the type check in our middleware
+// 2: Add a special prop to any action objects meant for the feed,
+//    then catch actions containing that prop in the middleware
+//    e.g. { action: 'foo', payload: { ... }, isFeedAction: true }
 const addFeedAction = (action: any) => {
   console.log('addFeedAction', action);
   return { type: FEED_ADD_ACTION, payload: { action } };
