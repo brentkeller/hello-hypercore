@@ -2,7 +2,6 @@ import React, { useRef, useState, useEffect, FormEventHandler } from 'react';
 
 import hypercore from 'hypercore';
 import crypto from 'hypercore-crypto';
-//import ram from 'random-access-memory';
 import rai from 'random-access-idb';
 
 import swarm from 'webrtc-swarm';
@@ -17,38 +16,27 @@ const secretKey = Buffer.from(
   '1234567890abcdef1234567890abcdef1234567890abcdef1234567890fedcba'
 );
 
-// const discoveryKey =
-//   'c65c11064005ef183421c45014e9831392069731239b2767ff6381152ac00379';
-
 const discoveryKey = crypto.discoveryKey(key);
-
 const discoveryKeyHex = discoveryKey.toString('hex');
 const todos = rai(`todos-${discoveryKeyHex.substr(0, 12)}`);
-
-console.log('crypto discoveryKey');
-
 const storage = (filename: any) => todos(filename);
-
 const mockCrypto = {
   sign: (data: any, sk: any, cb: any) => {
-    return cb(null, crypto.sign(data, sk))
+    return cb(null, crypto.sign(data, sk));
   },
   verify: (sig: any, data: any, pk: any, cb: any) => {
     // Always say it's valid (for testing)
-    return cb(null, true)
-  }
-}
+    return cb(null, true);
+  },
+};
 
+console.log('crypto discoveryKey');
 
-//const feed = new hypercore(storage, { valueEncoding: 'utf-8' });
 const feed = hypercore(storage, discoveryKey, {
   secretKey,
   valueEncoding: 'utf-8',
   crypto: mockCrypto,
 });
-
-// feed.append('hello world');
-
 feed.on('error', (err: any) => console.log(err));
 
 feed.on('ready', () => {
@@ -58,7 +46,6 @@ feed.on('ready', () => {
   const hub = signalhub(discoveryKeyHex, [
     'https://signalhub-jccqtwhdwc.now.sh/',
   ]);
-
   const sw = swarm(hub);
   sw.on('peer', (peer: any, id: any) => {
     console.log('peer', id, peer);
