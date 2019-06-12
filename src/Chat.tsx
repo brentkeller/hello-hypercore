@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, FormEventHandler, PureComponent } from 'react';
+import React, { useRef, useState, useEffect, FormEventHandler } from 'react';
 
 import hypercore from 'hypercore';
 import crypto from 'hypercore-crypto';
@@ -22,15 +22,30 @@ const secretKey = Buffer.from(
 
 const discoveryKey = crypto.discoveryKey(key);
 
+const discoveryKeyHex = discoveryKey.toString('hex');
+const todos = rai(`todos-${discoveryKeyHex.substr(0, 12)}`);
 
-const todos = rai('todos');
-
-console.log('crypto discoveryKey', discoveryKey.toString('hex'));
+console.log('crypto discoveryKey');
 
 const storage = (filename: any) => todos(filename);
 
+const mockCrypto = {
+  sign: (data: any, sk: any, cb: any) => {
+    return cb(null, crypto.sign(data, sk))
+  },
+  verify: (sig: any, data: any, pk: any, cb: any) => {
+    // Always say it's valid (for testing)
+    return cb(null, true)
+  }
+}
+
+
 //const feed = new hypercore(storage, { valueEncoding: 'utf-8' });
-const feed = hypercore(storage, discoveryKey, { secretKey, valueEncoding: 'utf-8' });
+const feed = hypercore(storage, discoveryKey, {
+  secretKey,
+  valueEncoding: 'utf-8',
+  crypto: mockCrypto,
+});
 
 // feed.append('hello world');
 
@@ -40,29 +55,30 @@ feed.on('ready', () => {
   console.log('ready', feed.key.toString('hex'));
   console.log('discovery', feed.discoveryKey.toString('hex'));
 
-  // const hub = signalhub(Buffer.from(discoveryKey), [
-  //   'https://signalhub-jccqtwhdwc.now.sh/',
-  // ]);
-
-  const hub = signalhub(discoveryKey.toString('hex'), [
+  const hub = signalhub(discoveryKeyHex, [
     'https://signalhub-jccqtwhdwc.now.sh/',
   ]);
 
   const sw = swarm(hub);
   sw.on('peer', (peer: any, id: any) => {
     console.log('peer', id, peer);
-    const replicationStream = feed.replicate({ encrypt: false, live: true });
-    peer.pipe(replicationStream).pipe(peer);
+    pump(
+      peer,
+      feed.replicate({
+        encrypt: false,
+        live: true,
+        upload: true,
+        download: true,
+      }),
+      peer
+    );
   });
-
-  //   // feed.get(0, (err: any, d: any) => console.log(d.toString()));
 });
 
 const stream = feed.createReadStream({ live: true });
 
 const addToFeed = (t: string) => {
   feed.append(t);
-  
 };
 
 export const Chat = () => {
