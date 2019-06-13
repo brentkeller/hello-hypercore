@@ -5,7 +5,7 @@ import './index.css';
 import * as serviceWorker from './serviceWorker';
 import { configureStore } from './store/store';
 import { Feed } from './feed';
-import { Chat } from './Chat';
+import { Chat } from './components/Chat';
 
 const store = configureStore([]);
 

@@ -2,7 +2,7 @@
 import React, { useRef, FormEventHandler } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { css, jsx } from '@emotion/core';
-import { addChatMessage } from './store/chatReducer';
+import { addChatMessage } from '../store/chatReducer';
 
 const wrapper = css`
   display: flex;
@@ -10,17 +10,25 @@ const wrapper = css`
   height: 100vh;
   width: 100%;
 `;
+const chatHeaderPane = css`
+  display: flex;
+  justify-item-self: flex-start;
+  flex-direction: row;
+  alight-content: center;
+`;
+
+const chatHeader = css`
+  display: flex;
+  flex: 1;
+  justify-item-self: flex-start;
+  margin: 8px 0 0 4px;
+`;
+
 const chatPane = css`
   display: flex;
   flex: 1;
   flex-grow: 1;
   flex-direction: column;
-`;
-
-const chatHeader = css`
-  display: flex;
-  justify-item-self: flex-start;
-  margin: 8px 0 0 4px;
 `;
 
 const chatLog = css`
@@ -62,7 +70,9 @@ export const Chat = () => {
   return (
     <div css={wrapper}>
       <div css={chatPane}>
-        <h3 css={chatHeader}>Chat log</h3>
+        <div css={chatHeaderPane}>
+          <h3 css={chatHeader}>Chat log</h3>
+        </div>
         <div css={chatLog}>
           {messages.map((d, i) => (
             <div key={i}>{d}</div>
