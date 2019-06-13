@@ -1,12 +1,53 @@
+/** @jsx jsx */
 import React, { useRef, FormEventHandler } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { css, jsx } from '@emotion/core';
 import { addChatMessage } from './store/chatReducer';
+
+const wrapper = css`
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+`;
+const chatPane = css`
+  display: flex;
+  flex: 1;
+  flex-grow: 1;
+  flex-direction: column;
+`;
+
+const chatHeader = css`
+  display: flex;
+  justify-item-self: flex-start;
+  margin: 8px 0 0 4px;
+`;
+
+const chatLog = css`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 2px 4px;
+  overflow-y: auto;
+`;
+
+const inputPane = css`
+  display: flex;
+  flex-basis: 34px;
+  align-content: stretch;
+`;
+
+const textbox = css`
+  display: flex;
+  flex: 1;
+  border-top: solid 2px black;
+  padding: 2px 4px;
+`;
 
 export const Chat = () => {
   const dispatch = useDispatch();
   const messages = useSelector<string[], string[]>(state => state);
-  console.log('messages', messages);
-
   const input = useRef<HTMLInputElement>() as React.RefObject<HTMLInputElement>;
   const save: FormEventHandler<HTMLFormElement> = e => {
     e.preventDefault();
@@ -14,19 +55,30 @@ export const Chat = () => {
       const newText = input.current.value.trim();
       if (newText.length === 0) return;
       dispatch(addChatMessage(newText));
-      //addToFeed(newText);
       input.current.value = '';
     }
   };
 
   return (
-    <div>
-      <form onSubmit={save}>
-        <input type="text" id="message" name="message" ref={input} />
+    <div css={wrapper}>
+      <div css={chatPane}>
+        <h3 css={chatHeader}>Chat log</h3>
+        <div css={chatLog}>
+          {messages.map((d, i) => (
+            <div key={i}>{d}</div>
+          ))}
+        </div>
+      </div>
+      <form onSubmit={save} css={inputPane}>
+        <input
+          type="text"
+          id="message"
+          name="message"
+          ref={input}
+          css={textbox}
+          placeholder="Type a message then press Enter..."
+        />
       </form>
-      {messages.map((d, i) => (
-        <div key={i}>{d}</div>
-      ))}
     </div>
   );
 };
