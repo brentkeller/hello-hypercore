@@ -3,6 +3,7 @@ import React, { useRef, FormEventHandler } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { css, jsx } from '@emotion/core';
 import { addChatMessage } from '../store/chatReducer';
+import { OnlineIndicator} from './OnlineIndicator';
 
 const wrapper = css`
   display: flex;
@@ -72,6 +73,7 @@ export const Chat = () => {
       <div css={chatPane}>
         <div css={chatHeaderPane}>
           <h3 css={chatHeader}>Chat log</h3>
+          <OnlineIndicator />
         </div>
         <div css={chatLog}>
           {messages.map((d, i) => (
