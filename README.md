@@ -1,3 +1,5 @@
+**This was a research project that led to [Cevitxe](https://github.com/herbCaudill/cevitxe), you should check it out**  
+
 Simple distributed browser-based chat app
 
 Features
@@ -17,3 +19,4 @@ UI
 [emotion](https://emotion.sh)  
   
 Redux approach inspired by [redux-swarmlog](https://github.com/philholden/redux-swarmlog)  
+
